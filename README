@@ -1,0 +1,98 @@
+# 📅 Agenda Firebase — Guia de Configuração
+
+## Estrutura do projeto
+
+```
+agenda-firebase/
+├── app.py                 # App Streamlit principal
+├── calendar_service.py    # Integração Google Calendar
+├── firebase_service.py    # Integração Firebase
+├── setup_auth.py          # Roda UMA VEZ para autorizar o Google
+├── requirements.txt
+├── credentials.json       # ← você vai baixar do Google Cloud (passo 1)
+├── token.json             # ← gerado automaticamente pelo setup_auth.py
+└── serviceAccount.json    # ← você vai baixar do Firebase (passo 2)
+```
+
+---
+
+## Passo 1 — Google Calendar API + credentials.json
+
+1. Acesse https://console.cloud.google.com
+2. Crie um projeto (ou use um existente)
+3. Vá em **APIs & Services → Library**, busque **Google Calendar API** e ative
+4. Vá em **APIs & Services → Credentials**
+5. Clique em **+ Create Credentials → OAuth client ID**
+   - Application type: **Desktop app**
+   - Name: qualquer nome
+6. Clique em **Download JSON** e salve como `credentials.json` na pasta do projeto
+
+> ⚠️ Se for a primeira vez usando OAuth no projeto, vá em **OAuth consent screen**,
+> selecione "External", preencha nome do app e adicione seu e-mail como "Test user".
+
+---
+
+## Passo 2 — Firebase + serviceAccount.json
+
+1. Acesse https://console.firebase.google.com
+2. Crie um novo projeto
+3. Vá em **Firestore Database → Create database**
+   - Escolha **Start in test mode** por enquanto
+   - Selecione a região mais próxima (us-east1 ou southamerica-east1)
+4. Vá em **Configurações do projeto (⚙️) → Service accounts**
+5. Clique em **Generate new private key**
+6. Salve o arquivo como `serviceAccount.json` na pasta do projeto
+
+---
+
+## Passo 3 — Instalar dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Passo 4 — Autorizar o Google Calendar (UMA VEZ SÓ)
+
+```bash
+python setup_auth.py
+```
+
+O navegador vai abrir. Faça login com a conta do Google que tem a agenda.
+Isso vai gerar o `token.json` — depois disso o app nunca mais pede login.
+
+---
+
+## Passo 5 — Rodar o app
+
+```bash
+streamlit run app.py
+```
+
+---
+
+## Como usar
+
+1. Use a **barra lateral** para definir o período de datas
+2. Clique em **Sincronizar agora** — isso busca do Google Calendar e salva no Firebase
+3. Na aba **Calendário** você vê a visão visual dos eventos
+4. Na aba **Lista** você filtra, busca e vê detalhes de cada evento
+5. Na próxima vez que abrir o app, os eventos já estarão no Firebase — só clica em sincronizar quando quiser atualizar
+
+---
+
+## Regras de segurança do Firestore (quando for para produção)
+
+No console do Firebase, em **Firestore → Rules**, troque por:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /eventos/{id} {
+      allow read, write: if false; // só o backend (service account) acessa
+    }
+  }
+}
+```

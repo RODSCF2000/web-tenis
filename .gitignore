@@ -1,0 +1,17 @@
+# Ignore sensitive files
+credentials.json
+serviceAccount.json
+token.json
+
+# # Ignore environment-specific scripts
+# encerrar.bat
+# iniciar.bat
+# Minha Agenda.vbs
+
+# # Ignore Python cache files
+# __pycache__/
+# *.pyc
+
+# # Ignore temporary or output files
+# *.log
+# *.tmp
