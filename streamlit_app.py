@@ -159,7 +159,7 @@ with tab_resumo:
             resumos_mensais = []
 
     hoje_mes = datetime.now().strftime("%Y-%m")
-    resumos_passados = [r for r in resumos_mensais if r.get("mes", "") < hoje_mes]
+    resumos_passados = [r for r in resumos_mensais if r.get("mes", "") <= hoje_mes]
 
     if not resumos_mensais:
         st.info("Nenhum resumo disponível. Sincronize primeiro.")
