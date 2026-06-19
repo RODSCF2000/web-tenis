@@ -318,3 +318,22 @@ with tab_anual:
                 if not encerrado:
                     dias_restantes = total_dias_periodo - dias_decorridos
                     st.caption(f"Dias restantes no período: **{dias_restantes}**")
+
+                # ── Gráfico evolução vs. meta ─────────────────────────────────
+                aulas_por_dia = r.get("aulas_por_dia", [])
+                if aulas_por_dia:
+                    st.divider()
+                    st.subheader("Evolução vs. meta diária")
+
+                    meta_acum   = list(range(1, len(aulas_por_dia) + 1))
+                    aulas_acum  = []
+                    _total = 0
+                    for _entry in aulas_por_dia:
+                        _total += _entry["aulas"]
+                        aulas_acum.append(_total)
+
+                    df_evolucao = pd.DataFrame(
+                        {"Meta (1/dia)": meta_acum, "Aulas realizadas": aulas_acum},
+                        index=pd.to_datetime([d["data"] for d in aulas_por_dia]),
+                    )
+                    st.line_chart(df_evolucao, use_container_width=True, height=300)

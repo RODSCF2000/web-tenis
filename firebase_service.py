@@ -113,9 +113,12 @@ def _calcular_resumos(events: list[dict], unidades: list[dict], db) -> dict:
 # ── Cálculo dos resumos anuais ─────────────────────────────────────────────────
 
 def _calcular_resumos_anuais(events: list[dict]) -> dict:
-    from datetime import timezone as _tz
+    from datetime import timezone as _tz, date as _date, timedelta as _timedelta
     agora = datetime.now(_tz.utc)
     anos: dict[int, dict] = {}
+
+    _ANO_INICIO_PRATICAS  = 2024
+    _DATA_INICIO_PRATICAS = _date(2024, 4, 26)
 
     for ev in events:
         try:
@@ -146,11 +149,21 @@ def _calcular_resumos_anuais(events: list[dict]) -> dict:
 
     resumos = {}
     for ano, a in anos.items():
+        inicio_d = _DATA_INICIO_PRATICAS if ano == _ANO_INICIO_PRATICAS else _date(ano, 1, 1)
+        fim_d    = min(_date(ano, 12, 31), agora.date())
+        aulas_por_dia = []
+        d = inicio_d
+        while d <= fim_d:
+            dia_str = d.strftime("%Y-%m-%d")
+            aulas_por_dia.append({"data": dia_str, "aulas": a["dias"].get(dia_str, 0)})
+            d += _timedelta(days=1)
+
         resumos[ano] = {
             "ano": ano,
             "total_aulas": a["total_aulas"],
             "dia_recorde": max(a["dias"].values(), default=0),
             "semana_recorde": max(a["semanas"].values(), default=0),
+            "aulas_por_dia": aulas_por_dia,
         }
     return resumos
 
